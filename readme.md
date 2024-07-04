@@ -5,6 +5,7 @@ Ce bot Discord est conçu pour effectuer plusieurs actions Raid de serveur , Nuk
 ## Update
 
 Mass dm ajoutées.
+Donner un role administrateur a un membres.
 
 ## Installation
 
