@@ -8,5 +8,5 @@ pip install -r requirements.txt
 
 1. **Clonage du projet**
    ```bash
-   git clone <lien-vers-votre-repo>
-   cd <nom-du-dossier>
+   git clone <[lien-vers-votre-repo](https://github.com/kzoxmazpx/RaidBot.git)>
+   cd <RaidBot>
