@@ -1,6 +1,6 @@
-# Bot Discord de TURBODEV
+# RaidBot Discord Tools
 
-Ce bot Discord est conçu pour effectuer plusieurs actions automatisées sur les serveurs Discord, telles que la création de salons, l'affichage des serveurs et l'invitation, ainsi que le nettoyage complet des serveurs (nuke).
+Ce bot Discord est conçu pour effectuer plusieurs actions Raid de serveur , Nuke de serveur ou Avoir la list des serveur ou et le bots.
 
 ## Installation
 
