@@ -63,7 +63,7 @@ async def nuke_server(guild):
 async def main_menu():
     while True:
         print("\nBienvenue ! Voici les options disponibles :")
-        print("1. Spam de serveur")
+        print("1. Raid serveur")
         print("2. Liste des serveurs et invitations")
         print("3. Nuke le serveur (efface tous les salons et rôles)")
         choice = input("Entrez votre choix (1, 2 ou 3) : ")
