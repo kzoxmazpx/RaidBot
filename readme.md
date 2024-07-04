@@ -2,6 +2,10 @@
 
 Ce bot Discord est conçu pour effectuer plusieurs actions Raid de serveur , Nuke de serveur ou Avoir la list des serveur ou et le bots.
 
+## Update
+
+Mass dm ajoutées.
+
 ## Installation
 
 pip install -r requirements.txt
