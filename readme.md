@@ -6,7 +6,11 @@ Ce bot Discord est conçu pour effectuer plusieurs actions automatisées sur les
 
 pip install -r requirements.txt
 
-1. **Clonage du projet**
+1. **Installation Requirements**
+   ```bash
+   pip install -r requirements.txt
+
+2. **Clonage du projet**
    ```bash
    git clone https://github.com/kzoxmazpx/RaidBot.git
    cd RaidBot
