@@ -189,6 +189,7 @@ async def main_menu():
 @client.event
 async def on_ready():
     print(f"Bot connecté en tant que {client.user}")
+    await client.change_presence(activity=discord.Game(name="github.com/kzoxmazpx/RaidBot"))
     await main_menu()
 
 if __name__ == "__main__":
