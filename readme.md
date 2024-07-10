@@ -6,7 +6,9 @@ Ce bot Discord est conçu pour effectuer plusieurs actions Raid de serveur , Nuk
 
 Mass dm ajoutées. ✅
 
-Donner un role administrateur a un membres. ✅
+Donner un role administrateur a un membres. ✅ 
+
+Erreur rate limited, requirements intents bots & permissions requis pour le bot ajoutées ✅  Date : 10/07/24
 
 ## Installation
 
