@@ -10,6 +10,8 @@ Donner un role administrateur a un membres. ✅
 
 Erreur rate limited, requirements intents bots & permissions requis pour le bot ajoutées ✅  Date : 10/07/24
 
+Mass rôle add ✅  Date : 27/08/24
+
 ## Screenshot
 
 ![Exemple](screenshot.png)
