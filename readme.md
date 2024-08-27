@@ -14,6 +14,8 @@ Erreur rate limited, requirements intents bots & permissions requis pour le bot 
 
 ![Exemple](screenshot.png)
 
+![Exemple](screenshot2.png)
+
 ## Installation
 
 pip install -r requirements.txt
