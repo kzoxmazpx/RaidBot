@@ -10,7 +10,7 @@ Donner un role administrateur a un membres. ✅
 
 Erreur rate limited, requirements intents bots & permissions requis pour le bot ajoutées ✅  Date : 10/07/24
 
-Banall/Unbanall ou Ban 1 personne ou Unban 1 personne ✅  Date : none
+Ban all/Unban all ou Ban 1 personne ou Unban 1 personne ✅  Date : none
 
 Mass rôle add ✅  Date : 27/08/24
 
